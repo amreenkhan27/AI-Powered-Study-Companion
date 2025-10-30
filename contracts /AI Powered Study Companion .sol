@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
 /**
  * @title AI Powered Study Companion
@@ -39,6 +39,7 @@ contract Project {
     event StudySessionLogged(uint256 indexed sessionId, address indexed student, string subject, uint256 duration);
     event RewardsEarned(address indexed student, uint256 amount);
     event TokensRedeemed(address indexed student, uint256 amount);
+    event OwnershipTransferred(address indexed oldOwner, address indexed newOwner);
     
     // Modifiers
     modifier onlyOwner() {
@@ -55,7 +56,7 @@ contract Project {
         owner = msg.sender;
         sessionCounter = 0;
     }
-    
+
     /**
      * @dev Function 1: Register a new student on the platform
      * @param _name Name of the student
@@ -78,9 +79,6 @@ contract Project {
     
     /**
      * @dev Function 2: Log a study session and earn rewards
-     * @param _subject Subject studied
-     * @param _duration Duration of study in minutes
-     * @param _aiAssisted Whether AI assistance was used
      */
     function logStudySession(
         string memory _subject,
@@ -124,7 +122,6 @@ contract Project {
     
     /**
      * @dev Function 3: Redeem reward tokens for incentives
-     * @param _amount Amount of tokens to redeem
      */
     function redeemTokens(uint256 _amount) public onlyRegistered {
         Student storage student = students[msg.sender];
@@ -132,11 +129,27 @@ contract Project {
         require(_amount > 0, "Amount must be greater than 0");
         
         student.rewardTokens -= _amount;
-        
         emit TokensRedeemed(msg.sender, _amount);
-        
-        // In a real implementation, this would trigger off-chain actions
-        // such as issuing certificates, unlocking premium content, etc.
+    }
+
+    /**
+     * @dev Function 4: Transfer ownership to another address (Admin control)
+     */
+    function transferOwnership(address _newOwner) public onlyOwner {
+        require(_newOwner != address(0), "Invalid new owner");
+        address oldOwner = owner;
+        owner = _newOwner;
+        emit OwnershipTransferred(oldOwner, _newOwner);
+    }
+
+    /**
+     * @dev Function 5: Reset a student's progress (admin action)
+     */
+    function resetStudentProgress(address _student) public onlyOwner {
+        require(students[_student].isRegistered, "Student not registered");
+        students[_student].studyHours = 0;
+        students[_student].rewardTokens = 0;
+        students[_student].lastStudyTimestamp = 0;
     }
     
     // View functions
@@ -178,3 +191,4 @@ contract Project {
         return sessionCounter;
     }
 }
+
