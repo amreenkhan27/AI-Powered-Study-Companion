@@ -1,69 +1,63 @@
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+# 🤖 AI Powered Study Companion (with REDEEM System)
 
-/**
- * @title GreenEnergyToken
- * @dev A simple token contract to promote renewable energy investments.
- */
-contract GreenEnergyToken {
-    string public name = "Green Energy Token";
-    string public symbol = "GET";
-    uint8 public decimals = 18;
-    uint256 public totalSupply;
+### 📘 Overview
 
-    mapping(address => uint256) public balanceOf;
-    mapping(address => bool) public verifiedProducer;
+The **AI Powered Study Companion** is a blockchain-based learning platform designed to motivate students through **tokenized rewards**.  
+It allows users to **create and share educational content** such as courses, notes, flashcards, and quizzes — while earning **points** that can be **redeemed** for StudyTokens.  
 
-    address public owner;
+This smart contract system runs on **Ethereum (Solidity)** and can easily be extended with **AI-based evaluation** for personalized learning experiences.
 
-    event Transfer(address indexed from, address indexed to, uint256 value);
-    event ProducerVerified(address indexed producer);
-    event TokensMinted(address indexed producer, uint256 amount);
+---
 
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Not contract owner");
-        _;
-    }
+## 💻 Smart Contracts
 
-    constructor() {
-        owner = msg.sender;
-    }
+### 🪙 `StudyToken.sol`
+- ERC20-style token called **StudyToken (STDY)**  
+- Used for rewarding learners and redeeming study points  
+- Mintable by the owner (companion contract can mint tokens during redeem)
 
-    /**
-     * @dev Verify a renewable energy producer.
-     * @param _producer The address of the producer to verify.
-     */
-    function verifyProducer(address _producer) external onlyOwner {
-        verifiedProducer[_producer] = true;
-        emit ProducerVerified(_producer);
-    }
+### 🧠 `StudyCompanion.sol`
+- Core logic of the platform  
+- Handles:
+  - Course creation  
+  - Notes and flashcard submissions  
+  - Quizzes (AI-verified off-chain if needed)  
+  - User point tracking  
+  - Token redemption (REDEEM system)  
 
-    /**
-     * @dev Mint tokens to verified producers as incentives.
-     * @param _amount The number of tokens to mint.
-     */
-    function mintTokens(uint256 _amount) external {
-        require(verifiedProducer[msg.sender], "Not a verified producer");
-        balanceOf[msg.sender] += _amount;
-        totalSupply += _amount;
-        emit TokensMinted(msg.sender, _amount);
-    }
+#### 🔑 Main Functionalities
 
-    /**
-     * @dev Transfer tokens between addresses.
-     * @param _to Recipient address.
-     * @param _value Amount of tokens to transfer.
-     */
-    function transfer(address _to, uint256 _value) external returns (bool) {
-        require(balanceOf[msg.sender] >= _value, "Insufficient balance");
-        require(_to != address(0), "Invalid address");
+| Function | Description |
+|-----------|--------------|
+| `createCourse(string title, string description)` | Create a new course |
+| `addNote(uint256 courseId, string ipfsHash)` | Add note linked to a course |
+| `addFlashcard(uint256 courseId, string front, string back)` | Add Q&A flashcards |
+| `createQuiz(uint256 courseId, string ipfsHash, uint256 rewardTokens)` | Add quizzes with token rewards |
+| `redeemPoints(uint256 pointsToRedeem)` | Redeem earned points for StudyTokens |
+| `setPointToTokenRate(uint256 newRate)` | Update conversion rate (points → tokens) |
+| `setRewardToken(address tokenAddress)` | Link StudyToken contract |
 
-        balanceOf[msg.sender] -= _value;
-        balanceOf[_to] += _value;
-        emit Transfer(msg.sender, _to, _value);
-        return true;
-    }
-}
-// contracts details | 0x3cC9Ae030682d32c706787A6d0524fbb261d8F75
-<img width="1573" height="737" alt="image" src="https://github.com/user-attachments/assets/47a2641b-91e6-4b37-a86d-ee428901aa5c" />
+---
 
+## 🌟 Features
+
+### 🎓 Learning System
+- Create and manage **courses** by topic or subject  
+- Upload **notes** and **flashcards** stored via IPFS  
+- Design **quizzes** with token-based rewards  
+- Students can **earn points** for every contribution
+
+### 💰 Reward System
+
+| Activity | Points Earned |
+|-----------|----------------|
+| Create Course | 5 Points |
+| Add Note | 3 Points |
+| Add Flashcard | 2 Points |
+| Create Quiz | 4 Points |
+
+Points can later be redeemed for tokens.
+
+function redeemPoints(uint256 pointsToRedeem) external
+
+https://private-user-images.githubusercontent.com/233385364/507580145-47a2641b-91e6-4b37-a86d-ee428901aa5c.png?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NjE5MDgzODUsIm5iZiI6MTc2MTkwODA4NSwicGF0aCI6Ii8yMzMzODUzNjQvNTA3NTgwMTQ1LTQ3YTI2NDFiLTkxZTYtNGIzNy1hODZkLWVlNDI4OTAxYWE1Yy5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUxMDMxJTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MTAzMVQxMDU0NDVaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT1iOTA4OTc0NWI5N2RhMmU3OTk3ZjRkMTI0M2U2MzVlNWU1NGU4MWVjZDJmNWRiMWQ3Y2IzNmQwYWI3NGY2N2NiJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.DIrbHIXKekOPH0OFRV6XI9DEQ-VNP6upIXWy_tCgTvw
